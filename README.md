@@ -292,6 +292,11 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Changelog
 
+### Version 1.1.3
+
+**Bug Fixes:**
+- 🐛 Fixed missing official ownCloud icon - corrected SVG file location in source directory
+
 ### Version 1.1.2
 
 **New Features:**
