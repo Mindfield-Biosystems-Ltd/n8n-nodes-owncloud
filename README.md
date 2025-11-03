@@ -64,19 +64,36 @@ Before using the ownCloud node, you need to set up credentials:
 3. Fill in the following information:
    - **ownCloud URL**: Your ownCloud instance URL (e.g., `https://cloud.example.com`)
    - **Username**: Your ownCloud username
-   - **App Password**: An app-specific password (recommended for security)
+   - **App Password**: Your ownCloud password (see options below)
 
-### Creating an App Password (Recommended)
+### Password Options
 
+You have **two options** for authentication:
+
+#### **Option 1: Regular Password** ✅ **WORKS**
+- Use your normal ownCloud password (the one for web login and desktop client)
+- **Quick and easy for getting started**
+- Works perfectly for most use cases
+
+#### **Option 2: App Password** ✅ **RECOMMENDED FOR SECURITY**
 For enhanced security, especially if you use 2FA:
 
 1. Log in to your ownCloud instance
-2. Go to **Settings** → **Security**
-3. Under "App passwords", enter a name (e.g., "n8n automation")
-4. Click **Create new app password**
-5. Copy the generated password and use it in n8n credentials
+2. Click on your **profile picture** (top right) → **Settings**
+3. In the left menu, click **Security**
+4. Scroll down to **"App passwords"** section
+5. Enter a name (e.g., "n8n automation")
+6. Click **"Create"** or **"Create new app password"**
+7. Copy the generated password
+8. Use this app password in n8n credentials (instead of your regular password)
 
-⚠️ **Security Note**: Never use your main ownCloud password in automation workflows. Always use app-specific passwords.
+**Benefits of App Passwords:**
+- ✅ Required if you have 2FA enabled
+- ✅ Can be revoked independently without changing your main password
+- ✅ More secure for automated workflows
+- ✅ Separate access control for different applications
+
+⚠️ **Important**: App passwords look different from regular passwords (usually longer, auto-generated string). Your regular password will also work, but app passwords are more secure!
 
 ## Usage Examples
 
