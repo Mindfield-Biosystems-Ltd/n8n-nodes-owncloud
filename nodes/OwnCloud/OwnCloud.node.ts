@@ -1,6 +1,9 @@
 import {
 	IExecuteFunctions,
+	ILoadOptionsFunctions,
 	INodeExecutionData,
+	INodeListSearchItems,
+	INodeListSearchResult,
 	INodeType,
 	INodeTypeDescription,
 	NodeOperationError,
@@ -57,6 +60,54 @@ export class OwnCloud implements INodeType {
 		],
 	};
 
+	methods = {
+		listSearch: {
+			async searchFiles(
+				this: ILoadOptionsFunctions,
+				filter?: string,
+			): Promise<INodeListSearchResult> {
+				const webDavClient = await getWebDavClient.call(this as any);
+				
+				try {
+					// Get root directory contents (non-recursive for performance and to avoid 412 errors)
+					const contents = await webDavClient.getDirectoryContents('/');
+					
+					const items: INodeListSearchItems[] = [];
+					
+					if (Array.isArray(contents)) {
+						for (const item of contents) {
+							const itemData = item as any;
+							const filename = itemData.filename || itemData.basename || '';
+							const type = itemData.type === 'directory' ? '📁' : '📄';
+							
+							// Apply filter if provided
+							if (filter && !filename.toLowerCase().includes(filter.toLowerCase())) {
+								continue;
+							}
+							
+							items.push({
+								name: `${type} ${filename}`,
+								value: filename,
+							});
+							
+							// Limit to 100 results for performance
+							if (items.length >= 100) {
+								break;
+							}
+						}
+					}
+					
+					return { results: items };
+				} catch (error: any) {
+					throw new NodeOperationError(
+						this.getNode(),
+						`Failed to load files: ${error.message}`,
+					);
+				}
+			},
+		},
+	};
+
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
@@ -67,7 +118,23 @@ export class OwnCloud implements INodeType {
 			try {
 				if (resource === 'file') {
 					const webDavClient = await getWebDavClient.call(this);
-					const path = this.getNodeParameter('path', i) as string;
+					
+					// Handle resource locator format (not needed for search operation)
+					let path: string = '';
+					if (operation === 'createFolder') {
+						// Simple string for createFolder
+						path = this.getNodeParameter('path', i) as string;
+					} else if (operation !== 'search') {
+						// Resource locator for other operations (except search)
+						const pathData = this.getNodeParameter('path', i) as any;
+						if (typeof pathData === 'string') {
+							path = pathData;
+						} else if (pathData && typeof pathData === 'object') {
+							path = pathData.value || pathData.path || '';
+						} else {
+							path = '';
+						}
+					}
 
 					if (operation === 'upload') {
 						const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i) as string;
@@ -174,12 +241,44 @@ export class OwnCloud implements INodeType {
 							json: stats as any,
 							pairedItem: { item: i },
 						});
+					} else if (operation === 'search') {
+						const searchQuery = this.getNodeParameter('searchQuery', i) as string;
+						const searchPath = this.getNodeParameter('searchPath', i, '/') as string;
+
+						// Get directory contents (non-recursive to avoid 412 errors)
+						// Note: For deep search, users should use the List operation with subfolders
+						const contents = await webDavClient.getDirectoryContents(searchPath);
+
+						if (Array.isArray(contents)) {
+							const searchLower = searchQuery.toLowerCase();
+							
+							contents.forEach((item: any) => {
+								const filename = item.filename || item.basename || '';
+								
+								// Case-insensitive search
+								if (filename.toLowerCase().includes(searchLower)) {
+									returnData.push({
+										json: item,
+										pairedItem: { item: i },
+									});
+								}
+							});
+						}
 					}
 				} else if (resource === 'share') {
 					const endpoint = '/ocs/v2.php/apps/files_sharing/api/v1/shares';
 
 					if (operation === 'create') {
-						const path = this.getNodeParameter('path', i) as string;
+						// Handle resource locator format for path
+						let path: string = '';
+						const pathData = this.getNodeParameter('path', i) as any;
+						if (typeof pathData === 'string') {
+							path = pathData;
+						} else if (pathData && typeof pathData === 'object') {
+							path = pathData.value || pathData.path || '';
+						} else {
+							path = '';
+						}
 						const shareType = this.getNodeParameter('shareType', i) as number;
 						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as any;
 
@@ -231,7 +330,16 @@ export class OwnCloud implements INodeType {
 							pairedItem: { item: i },
 						});
 					} else if (operation === 'getAll') {
-						const path = this.getNodeParameter('path', i) as string;
+						// Handle resource locator format for path
+						let path: string = '';
+						const pathData = this.getNodeParameter('path', i) as any;
+						if (typeof pathData === 'string') {
+							path = pathData;
+						} else if (pathData && typeof pathData === 'object') {
+							path = pathData.value || pathData.path || '';
+						} else {
+							path = '';
+						}
 						const response = await ownCloudApiRequest.call(this, 'GET', endpoint, undefined, { path });
 
 						if (Array.isArray(response)) {

@@ -48,12 +48,12 @@ export const shareOperations: INodeProperties[] = [
 ];
 
 export const shareFields: INodeProperties[] = [
-	// Path - for Create and GetAll
+	// Path - for Create and GetAll (with resource locator)
 	{
 		displayName: 'Path',
 		name: 'path',
-		type: 'string',
-		default: '',
+		type: 'resourceLocator',
+		default: { mode: 'list', value: '' },
 		required: true,
 		displayOptions: {
 			show: {
@@ -61,8 +61,34 @@ export const shareFields: INodeProperties[] = [
 				operation: ['create', 'getAll'],
 			},
 		},
-		placeholder: '/path/to/file.txt',
-		description: 'The path to the file or folder',
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				placeholder: 'Select a file or folder...',
+				typeOptions: {
+					searchListMethod: 'searchFiles',
+					searchable: true,
+				},
+			},
+			{
+				displayName: 'By Path',
+				name: 'path',
+				type: 'string',
+				placeholder: '/path/to/file.txt',
+				validation: [
+					{
+						type: 'regex',
+						properties: {
+							regex: '^/.*',
+							errorMessage: 'Path must start with /',
+						},
+					},
+				],
+			},
+		],
+		description: 'The file or folder to share or get shares for',
 	},
 	// Share ID - for Get, Delete, Update
 	{

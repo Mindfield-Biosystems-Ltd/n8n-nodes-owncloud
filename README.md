@@ -10,13 +10,14 @@ This is an n8n community node that provides full integration with ownCloud, enab
 
 ### File Operations (WebDAV)
 - **Upload** - Upload files to ownCloud from n8n workflows
-- **Download** - Download files from ownCloud as binary data
+- **Download** - Download files from ownCloud as binary data (with file picker support)
 - **Delete** - Delete files or folders
 - **Create Folder** - Create new directories
 - **List** - List contents of folders
 - **Move** - Move or rename files and folders
 - **Copy** - Copy files and folders
 - **Get Properties** - Retrieve metadata about files and folders
+- **Search** - Search for files and folders by name (NEW in v1.1.0)
 
 ### Share Operations (OCS API)
 - **Create Share** - Create public links or share with users/groups
@@ -151,6 +152,7 @@ Process multiple files in a workflow:
 | Move | Move or rename file/folder | Path, Destination Path |
 | Copy | Copy file or folder | Path, Destination Path |
 | Get Properties | Get file/folder metadata | Path |
+| Search | Search for files and folders | Search Query, Search Path |
 
 ### Share Resource
 
@@ -289,6 +291,36 @@ The ownCloud icon used in this project is for identification purposes only and f
 Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Changelog
+
+### Version 1.1.2
+
+**New Features:**
+- 📁 **Share Operations File Picker** - Added resource locator with "From List" option to Create Share and Get Many Shares operations for easier file/folder selection
+
+**Improvements:**
+- Consistent UX across all operations - both File and Share resources now support live directory browsing
+- Better path selection for sharing workflows
+
+### Version 1.1.1
+
+**Bug Fixes:**
+- 🐛 Fixed "412 Precondition Failed" error in file picker by removing recursive directory traversal
+- 🐛 Fixed "Could not get parameter" error in Search operation by correcting parameter handling
+- ⚡ Improved performance by loading only top-level directory contents in file picker
+
+### Version 1.1.0
+
+**New Features:**
+- 🎨 **Official ownCloud Icon** - Updated to use the official ownCloud SVG logo
+- 🔐 **Improved Credentials** - Clarified that both regular passwords and app passwords work
+- 📁 **File/Folder Picker** - Added live directory browsing with "From List" option for easier file selection
+- 🔍 **Search Operation** - New search functionality to find files and folders by name across your ownCloud instance
+- ⚡ **Enhanced UX** - Resource locator for path fields with validation
+
+**Improvements:**
+- Better path validation (must start with `/`)
+- Searchable file picker for all file operations (except Create Folder)
+- Case-insensitive file search with customizable search path
 
 ### Version 1.0.0 (Initial Release)
 

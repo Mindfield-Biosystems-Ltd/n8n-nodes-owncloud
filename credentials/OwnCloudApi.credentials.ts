@@ -23,7 +23,7 @@ export class OwnCloudApi implements ICredentialType {
 			description: 'Your ownCloud username',
 		},
 		{
-			displayName: 'App Password',
+			displayName: 'Password',
 			name: 'password',
 			type: 'string',
 			typeOptions: {
@@ -31,7 +31,7 @@ export class OwnCloudApi implements ICredentialType {
 			},
 			default: '',
 			required: true,
-			description: 'App password from your ownCloud security settings (recommended for 2FA)',
+			description: 'Your ownCloud password (regular password or app password both work). For enhanced security with 2FA, create an app password in Settings → Security.',
 		},
 	];
 }

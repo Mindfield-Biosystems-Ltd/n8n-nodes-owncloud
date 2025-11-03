@@ -55,6 +55,12 @@ export const fileOperations: INodeProperties[] = [
 				action: 'Move a file or folder',
 			},
 			{
+				name: 'Search',
+				value: 'search',
+				description: 'Search for files and folders',
+				action: 'Search for files and folders',
+			},
+			{
 				name: 'Upload',
 				value: 'upload',
 				description: 'Upload a file',
@@ -66,9 +72,51 @@ export const fileOperations: INodeProperties[] = [
 ];
 
 export const fileFields: INodeProperties[] = [
-	// Path - required for most operations
+	// Path - required for most operations (with resource locator for browsing)
 	{
 		displayName: 'Path',
+		name: 'path',
+		type: 'resourceLocator',
+		default: { mode: 'list', value: '' },
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['file'],
+				operation: ['upload', 'download', 'delete', 'list', 'move', 'copy', 'stat'],
+			},
+		},
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				placeholder: 'Select a file or folder...',
+				typeOptions: {
+					searchListMethod: 'searchFiles',
+					searchable: true,
+				},
+			},
+			{
+				displayName: 'By Path',
+				name: 'path',
+				type: 'string',
+				placeholder: '/path/to/file.txt',
+				validation: [
+					{
+						type: 'regex',
+						properties: {
+							regex: '^/.*',
+							errorMessage: 'Path must start with /',
+						},
+					},
+				],
+			},
+		],
+		description: 'The file or folder to operate on',
+	},
+	// Simple path for createFolder (no need for resource locator)
+	{
+		displayName: 'Folder Path',
 		name: 'path',
 		type: 'string',
 		default: '',
@@ -76,11 +124,41 @@ export const fileFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['file'],
-				operation: ['upload', 'download', 'delete', 'createFolder', 'list', 'move', 'copy', 'stat'],
+				operation: ['createFolder'],
 			},
 		},
-		placeholder: '/path/to/file.txt',
-		description: 'The full path to the file or folder in ownCloud',
+		placeholder: '/path/to/newfolder',
+		description: 'The full path for the new folder',
+	},
+	// Search Query - for Search operation
+	{
+		displayName: 'Search Query',
+		name: 'searchQuery',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['file'],
+				operation: ['search'],
+			},
+		},
+		placeholder: 'filename',
+		description: 'Search for files and folders by name (case-insensitive)',
+	},
+	{
+		displayName: 'Search Path',
+		name: 'searchPath',
+		type: 'string',
+		default: '/',
+		displayOptions: {
+			show: {
+				resource: ['file'],
+				operation: ['search'],
+			},
+		},
+		placeholder: '/folder/to/search',
+		description: 'The folder to search in (default: root)',
 	},
 	// Binary Property Name - for Upload
 	{
